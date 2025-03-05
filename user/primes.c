@@ -67,5 +67,5 @@ prime_filter(int in_fd, int prime)
 	close(out_pipe[1]);
 
 	return out_pipe[0];
-//ahskdjhas
+//aa
 }
