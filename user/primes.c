@@ -5,67 +5,55 @@
 #define MAX 280
 #define FIRST_PRIME 2
 
-int generate_natural(); 
-int prime_filter(int in_fd, int prime);  
+int generate_numbers();
+int filter_numbers(int read_fd, int prime);
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
-	int prime; 
-	
-	int in = generate_natural();
-	while (read(in, &prime, sizeof(int))) {
-		printf("prime %d\n", prime); 
-		in = prime_filter(in, prime);
-	}
+    int current_prime;
+    int read_fd = generate_numbers();
 
-	exit(0);
+    while (read(read_fd, &current_prime, sizeof(int)) > 0) {
+        printf("prime %d\n", current_prime);
+        read_fd = filter_numbers(read_fd, current_prime);
+    }
+
+    exit(0);
 }
 
-int
-generate_natural() {
-	int out_pipe[2];
-	
-	pipe(out_pipe);
+int generate_numbers() {
+    int fd[2];
+    pipe(fd);
 
-	if (!fork()) {
-		for (int i = FIRST_PRIME; i < MAX; i++) {
-			write(out_pipe[1], &i, sizeof(int));
-		}
-		close(out_pipe[1]);
-
-		exit(0);
-	}
-
-	close(out_pipe[1]);
-
-	return out_pipe[0];
+    if (fork() == 0) {
+        close(fd[0]);
+        for (int i = FIRST_PRIME; i <= MAX; i++) {
+            write(fd[1], &i, sizeof(int));
+        }
+        close(fd[1]);
+        exit(0);
+    }
+    close(fd[1]);
+    return fd[0];
 }
 
+int filter_numbers(int read_fd, int prime) {
+    int fd[2];
+    int num;
+    pipe(fd);
 
-int 
-prime_filter(int in_fd, int prime) 
-{
-	int num;
-	int out_pipe[2];
-
-	pipe(out_pipe);
-
-	if (!fork()) {
-		while (read(in_fd, &num, sizeof(int))) {
-			if (num % prime) {
-				write(out_pipe[1], &num, sizeof(int));
-			}
-		}
-		close(in_fd);
-		close(out_pipe[1]);
-		
-		exit(0);
-	}
-
-	close(in_fd);
-	close(out_pipe[1]);
-
-	return out_pipe[0];
-//aa
+    if (fork() == 0) {
+        close(fd[0]);
+        while (read(read_fd, &num, sizeof(int)) > 0) {
+            if (num % prime != 0) {
+                write(fd[1], &num, sizeof(int));
+            }
+        }
+        close(read_fd);
+        close(fd[1]);
+        exit(0);
+    }
+    close(read_fd);
+    close(fd[1]);
+    return fd[0];
 }
