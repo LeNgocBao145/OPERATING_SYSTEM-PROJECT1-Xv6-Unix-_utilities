@@ -196,8 +196,9 @@ UPROGS=\
 	$U/_zombie\
 	$U/_pingpong\
 	$U/_find\
-	$U/_xargs\	
+	$U/_xargs\
 	$U/_primes\
+
 ifeq ($(LAB),syscall)
 UPROGS += \
 	$U/_attack\
