@@ -91,3 +91,18 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_trace(void)
+{
+  int mask;
+  argint(0, &mask);  // Lấy tham số mask từ user space
+  
+  if (mask < 0)  // Kiểm tra nếu mask bị lỗi
+    return -1;
+
+  struct proc *p = myproc();
+  p->trace_mask = mask;  // Lưu mask vào struct proc
+
+  return 0;
+}

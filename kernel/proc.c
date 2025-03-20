@@ -169,6 +169,9 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+
+  // Reset trace_mask khi process bị giải phóng
+  p->trace_mask = 0;
 }
 
 // Create a user page table for a given process, with no user memory,
@@ -296,19 +299,22 @@ fork(void)
   }
   np->sz = p->sz;
 
-  // copy saved user registers.
+  // Copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
 
-  // increment reference counts on open file descriptors.
+  // Increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
     if(p->ofile[i])
       np->ofile[i] = filedup(p->ofile[i]);
   np->cwd = idup(p->cwd);
 
   safestrcpy(np->name, p->name, sizeof(p->name));
+
+  // Sao chép trace_mask từ cha sang con trước khi giải phóng lock
+  np->trace_mask = p->trace_mask;
 
   pid = np->pid;
 
@@ -319,11 +325,12 @@ fork(void)
   release(&wait_lock);
 
   acquire(&np->lock);
-  np->state = RUNNABLE;
+  np->state = RUNNABLE;  // Chỉ đánh dấu tiến trình con là RUNNABLE sau khi mọi thứ đã được thiết lập.
   release(&np->lock);
 
   return pid;
 }
+
 
 // Pass p's abandoned children to init.
 // Caller must hold wait_lock.

@@ -194,7 +194,7 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
-
+	$U/_trace
 
 
 
@@ -376,3 +376,7 @@ zipball: clean submit-check
 	git archive --verbose --format zip --output lab.zip HEAD
 
 .PHONY: zipball clean grade submit-check
+
+$U/_trace: $U/trace.o $(ULIB)
+	$(LD) $(LDFLAGS) -T $U/user.ld -o $U/_trace $U/trace.o $(ULIB)
+	$(OBJDUMP) -S $U/_trace > $U/trace.asm
