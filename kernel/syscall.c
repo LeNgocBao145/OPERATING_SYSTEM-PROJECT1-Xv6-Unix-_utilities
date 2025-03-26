@@ -130,6 +130,31 @@ static uint64 (*syscalls[])(void) = {
 [SYS_trace]   sys_trace,
 };
 
+static int syscall_num_args[] = {
+  [SYS_fork]    = 0,
+  [SYS_exit]    = 1,
+  [SYS_wait]    = 1,
+  [SYS_pipe]    = 1,
+  [SYS_read]    = 3,
+  [SYS_kill]    = 1,
+  [SYS_exec]    = 2,
+  [SYS_fstat]   = 2,
+  [SYS_chdir]   = 1,
+  [SYS_dup]     = 1,
+  [SYS_getpid]  = 0,
+  [SYS_sbrk]    = 1,
+  [SYS_sleep]   = 1,
+  [SYS_uptime]  = 0,
+  [SYS_open]    = 2,
+  [SYS_write]   = 3,
+  [SYS_mknod]   = 3,
+  [SYS_unlink]  = 1,
+  [SYS_link]    = 2,
+  [SYS_mkdir]   = 1,
+  [SYS_close]   = 1,
+  [SYS_trace]   = 1
+};
+
 static char *syscall_name[] = {
   "", 
   "fork", 
@@ -169,8 +194,19 @@ syscall(void)
 
     // Nếu syscall này nằm trong mask trace, in ra log
     if (p->trace_mask & (1 << num)) {
-      printf("%d: syscall %s -> %ld\n", p->pid, syscall_name[num], p->trapframe->a0);
-    }
+      int nargs = syscall_num_args[num];
+      printf("%d: syscall %s(", p->pid, syscall_name[num]);
+  
+      if (nargs > 0) printf("%ld", p->trapframe->a0);
+      if (nargs > 1) printf(", %ld", p->trapframe->a1);
+      if (nargs > 2) printf(", %ld", p->trapframe->a2);
+      if (nargs > 3) printf(", %ld", p->trapframe->a3);
+      if (nargs > 4) printf(", %ld", p->trapframe->a4);
+      if (nargs > 5) printf(", %ld", p->trapframe->a5);
+  
+      printf(") -> %ld\n", p->trapframe->a0);
+  }
+  
   } else {
     printf("%d %s: unknown sys call %d\n",
             p->pid, p->name, num);
