@@ -7,6 +7,8 @@
 #include "proc.h"
 #include "sysinfo.h"
 
+extern struct proc proc[NPROC];
+
 uint64
 sys_exit(void)
 {
@@ -92,3 +94,57 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_trace(void)
+{
+  int mask;
+  argint(0, &mask);  // Lấy tham số mask từ user space
+  
+  if (mask < 0)  // Kiểm tra nếu mask bị lỗi
+    return -1;
+
+  struct proc *p = myproc();
+  p->trace_mask = mask;  // Lưu mask vào struct proc
+
+  return 0;
+}
+
+  uint64 load_average() {
+    struct proc *p;
+    uint64 count = 0;
+
+    for (p = proc; p < &proc[NPROC]; p++) {
+      if (p->state == RUNNING || p->state == RUNNABLE) {
+        count++;
+      }
+    }
+
+    return count; // Load trung bình trong 1 khoảng thời gian
+  }
+
+int sys_sysinfo(void) {
+  uint64 addr;
+  struct sysinfo info;
+
+  // Lấy địa chỉ struct sysinfo từ user space
+  argaddr(0, &addr);
+
+  // Lấy bộ nhớ trống
+  info.freemem = freemem();
+
+  // Lấy số lượng tiến trình
+  info.nproc = nproc();
+
+  // Lấy load average
+  info.loadavg = load_average();
+
+  // Copy struct sysinfo về user space
+  if (copyout(myproc()->pagetable, addr, (char *)&info, sizeof(info)) < 0)
+    return -1;
+
+  return 0;
+}
+
+
+

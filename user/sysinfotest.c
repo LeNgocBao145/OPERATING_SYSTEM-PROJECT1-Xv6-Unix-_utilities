@@ -8,6 +8,9 @@ int main() {
         printf("sysinfotest: failed\n");
         exit(1);
     }
+    printf("Free memory: %ld bytes\n", info.freemem);
+    printf("Not UNUSED processes: %ld\n", info.nproc);
+    printf("Load average: %ld\n", info.loadavg);
     printf("sysinfotest: OK\n");
     exit(0);
 }
