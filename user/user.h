@@ -1,4 +1,6 @@
 struct stat;
+struct sysinfo;
+int sysinfo(struct sysinfo *);
 
 // system calls
 int fork(void);
