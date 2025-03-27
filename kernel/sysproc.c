@@ -110,18 +110,18 @@ sys_trace(void)
   return 0;
 }
 
-  uint64 load_average() {
-    struct proc *p;
-    uint64 count = 0;
+uint64 load_average() {
+  struct proc *p;
+  uint64 count = 0;
 
-    for (p = proc; p < &proc[NPROC]; p++) {
-      if (p->state == RUNNING || p->state == RUNNABLE) {
-        count++;
-      }
+  for (p = proc; p < &proc[NPROC]; p++) {
+    if (p->state == RUNNING || p->state == RUNNABLE) {
+      count++;
     }
-
-    return count; // Load trung bình trong 1 khoảng thời gian
   }
+
+  return count; 
+}
 
 int sys_sysinfo(void) {
   uint64 addr;

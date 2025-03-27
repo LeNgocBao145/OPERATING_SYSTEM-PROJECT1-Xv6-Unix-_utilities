@@ -83,13 +83,18 @@ kalloc(void)
 
 
 uint64 freemem(void) {
-  struct run *r;
-  uint64 free_mem = 0;
+  struct run *r;  
+  uint64 free_mem = 0;  
 
+  // Đảm bảo tính đồng bộ bằng cách khóa bộ nhớ trước khi truy cập danh sách freelist.
   acquire(&kmem.lock);
+
+  // Duyệt qua danh sách các trang nhớ trống.
   for (r = kmem.freelist; r; r = r->next)
-      free_mem += PGSIZE;
+      free_mem += PGSIZE;  // Mỗi trang có kích thước PGSIZE, cộng dồn vào free_mem.
+
+  // Giải phóng khóa sau khi hoàn thành truy xuất danh sách.
   release(&kmem.lock);
 
-  return free_mem;
+  return free_mem;  
 }

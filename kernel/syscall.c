@@ -180,7 +180,8 @@ static char *syscall_name[] = {
   "link", 
   "mkdir",
   "close", 
-  "trace"
+  "trace",
+  "sysinfo"
 };
 
 

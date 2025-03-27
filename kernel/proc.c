@@ -704,12 +704,14 @@ procdump(void)
 
 
 int nproc(void) {
-  struct proc *p;
-  int count = 0;
+  struct proc *p;   
+  int count = 0;    
 
+  // Duyệt qua mảng proc chứa danh sách tất cả các tiến trình.
   for (p = proc; p < &proc[NPROC]; p++) {
-      if (p->state != UNUSED)
-          count++;
+    if (p->state != UNUSED)
+        count++;
   }
-  return count;
+  
+  return count; 
 }
